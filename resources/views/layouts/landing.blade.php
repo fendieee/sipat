@@ -5,62 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistem Peminjaman Alat')</title>
 
-    <!-- Google Font -->
+    {{-- Bootstrap --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {{-- Google Font --}}
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
-            background: #f9fafb;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb;
         }
 
-        /* ===== NAVBAR ===== */
-        header {
-            background: #020617;
-            color: white;
-            padding: 20px 80px;
+        .navbar-custom {
+            background-color: #020617;
         }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav h1 {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        nav .menu a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
-        }
-
-        nav .menu a:hover {
-            text-decoration: underline;
-        }
-
-        /* ===== CONTENT ===== */
-        main {
-            min-height: 80vh;
-        }
-
-        /* ===== FOOTER ===== */
         footer {
-            background: #020617;
+            background-color: #020617;
             color: #cbd5e1;
-            text-align: center;
-            padding: 20px;
             font-size: 14px;
         }
     </style>
@@ -69,27 +32,51 @@
 </head>
 <body>
 
-<header>
-    <nav>
-        <h1>Peminjaman Alat</h1>
+{{-- NAVBAR --}}
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom px-4 px-lg-5">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">
+            Peminjaman Alat
+        </a>
 
-        <div class="menu">
-            <a href="/">Home</a>
-            <a href="#fitur">Fitur</a>
-            <a href="#kontak">Kontak</a>
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}">Register</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav gap-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('login') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-outline-light btn-sm ms-lg-2"
+                       href="{{ route('register') }}">
+                        Register
+                    </a>
+                </li>
+            </ul>
         </div>
-    </nav>
-</header>
+    </div>
+</nav>
 
-<main>
+{{-- CONTENT --}}
+<main class="container py-5" style="min-height: 80vh;">
     @yield('content')
 </main>
 
-<footer>
-    <p>© {{ date('Y') }} Sistem Peminjaman Alat</p>
+{{-- FOOTER --}}
+<footer class="py-3 text-center">
+    <p class="mb-0">
+        © {{ date('Y') }} Sistem Peminjaman Alat
+    </p>
 </footer>
+
+{{-- Bootstrap JS --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 @stack('scripts')
 </body>

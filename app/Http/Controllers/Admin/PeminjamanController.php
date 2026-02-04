@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Models\Alat;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
+    // Tampilkan semua peminjaman
     public function index()
     {
         $peminjamans = Peminjaman::with(['user', 'alat'])
@@ -20,6 +22,7 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.index', compact('peminjamans'));
     }
 
+    // Form tambah peminjaman (admin)
     public function create()
     {
         $users = User::where('role', 'peminjam')->get();
@@ -28,91 +31,52 @@ class PeminjamanController extends Controller
         return view('admin.peminjaman.create', compact('users', 'alats'));
     }
 
+    // Simpan peminjaman (admin langsung dipinjam)
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'alat_id' => 'required|exists:alats,id',
             'tanggal_pinjam' => 'required|date',
             'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
         ]);
 
-        $cek = Peminjaman::where('user_id', $request->user_id)
-            ->where('alat_id', $request->alat_id)
+        // Cek duplikasi peminjaman
+        $exists = Peminjaman::where('user_id', $validated['user_id'])
+            ->where('alat_id', $validated['alat_id'])
+            ->whereIn('status', ['pending', 'dipinjam'])
             ->exists();
 
-        if ($cek) {
-            return back()->with('error', 'User sudah meminjam alat ini');
+        if ($exists) {
+            return back()->with('error', 'User masih meminjam atau mengajukan alat ini');
         }
 
-        $alat = Alat::findOrFail($request->alat_id);
+        $alat = Alat::findOrFail($validated['alat_id']);
 
         if ($alat->stok <= 0) {
             return back()->with('error', 'Stok alat habis');
         }
 
+        // Kurangi stok alat
         $alat->decrement('stok');
 
+        // Admin: langsung set status dipinjam
         Peminjaman::create([
-            'user_id' => $request->user_id,
-            'alat_id' => $request->alat_id,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
+            'user_id' => $validated['user_id'],
+            'alat_id' => $validated['alat_id'],
+            'tanggal_pinjam' => $validated['tanggal_pinjam'],
+            'tanggal_jatuh_tempo' => $validated['tanggal_jatuh_tempo'],
+            'status' => 'dipinjam',
         ]);
 
+        // Catat log aktivitas
         LogAktivitas::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'aktivitas' => 'Menambahkan data peminjaman alat',
         ]);
 
         return redirect()
             ->route('admin.peminjaman.index')
             ->with('success', 'Peminjaman berhasil ditambahkan');
-    }
-
-    public function edit(Peminjaman $peminjaman)
-    {
-        return view('admin.peminjaman.edit', compact('peminjaman'));
-    }
-
-    public function update(Request $request, Peminjaman $peminjaman)
-    {
-        $request->validate([
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
-        ]);
-
-        $peminjaman->update([
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
-        ]);
-
-        LogAktivitas::create([
-            'user_id' => auth()->id(),
-            'aktivitas' => 'Admin mengubah data peminjaman',
-        ]);
-
-        return redirect()
-            ->route('admin.peminjaman.index')
-            ->with('success', 'Data peminjaman berhasil diperbarui');
-    }
-
-    public function destroy($id)
-    {
-        $peminjaman = Peminjaman::findOrFail($id);
-
-        // Kembalikan stok alat
-        $peminjaman->alat->increment('stok');
-
-        $peminjaman->delete();
-
-        LogAktivitas::create([
-            'user_id' => auth()->id(),
-            'aktivitas' => 'Admin menghapus data peminjaman',
-        ]);
-
-        return redirect()
-            ->route('admin.peminjaman.index')
-            ->with('success', 'Peminjaman berhasil dihapus');
     }
 }

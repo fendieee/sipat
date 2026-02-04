@@ -3,33 +3,45 @@
 @section('title', 'Laporan Peminjaman')
 
 @section('content')
-<h2>Laporan Peminjaman</h2>
+<div class="container-fluid">
 
-<a href="{{ route('petugas.laporan-peminjaman.cetak') }}" target="_blank">
-    <button>Cetak Laporan</button>
-</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ route('petugas.laporan-peminjaman.cetak') }}" target="_blank" class="btn btn-primary">
+            Cetak Laporan
+        </a>
+    </div>
 
-<br><br>
-
-<table border="1" cellpadding="8" width="100%">
-    <tr>
-        <th>No</th>
-        <th>Peminjam</th>
-        <th>Alat</th>
-        <th>Tgl Pinjam</th>
-        <th>Tgl Kembali</th>
-        <th>Status</th>
-    </tr>
-
-    @foreach($peminjamans as $p)
-    <tr>
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ $p->user->name }}</td>
-        <td>{{ $p->alat->nama_alat }}</td>
-        <td>{{ $p->tanggal_pinjam }}</td>
-        <td>{{ $p->tanggal_kembali ?? '-' }}</td>
-        <td>{{ $p->status }}</td>
-    </tr>
-    @endforeach
-</table>
+    @if($peminjamans->isEmpty())
+        <div class="alert alert-warning">
+            Data peminjaman tidak tersedia.
+        </div>
+    @else
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>No</th>
+                        <th>Peminjam</th>
+                        <th>Alat</th>
+                        <th>Tgl Pinjam</th>
+                        <th>Tgl Kembali</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($peminjamans as $p)
+                        <tr class="text-center">
+                            <td>{{ $loop->iteration }}</td>
+                            <td class="text-start">{{ $p->user->name }}</td>
+                            <td class="text-start">{{ $p->alat->nama_alat }}</td>
+                            <td>{{ $p->tanggal_pinjam }}</td>
+                            <td>{{ $p->tanggal_kembali ?? '-' }}</td>
+                            <td>{{ ucfirst($p->status) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</div>
 @endsection

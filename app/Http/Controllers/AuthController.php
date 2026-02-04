@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ===== FORM =====
+    // Tampilkan halaman login
     public function showLogin()
     {
         return view('auth.login');
     }
 
+    // Tampilkan halaman register
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // ===== LOGIN =====
+    // Proses login dan arahkan berdasarkan role
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -31,7 +32,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // REDIRECT BERDASARKAN ROLE
             $role = Auth::user()->role;
 
             if ($role === 'admin') {
@@ -50,7 +50,7 @@ class AuthController extends Controller
         ]);
     }
 
-    // ===== REGISTER (PEMINJAM ONLY) =====
+    // Registrasi hanya untuk peminjam
     public function register(Request $request)
     {
         $request->validate([
@@ -69,7 +69,7 @@ class AuthController extends Controller
         return redirect('/login')->with('success', 'Registrasi berhasil');
     }
 
-    // ===== LOGOUT =====
+    // Proses logout
     public function logout(Request $request)
     {
         Auth::logout();

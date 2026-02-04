@@ -3,24 +3,65 @@
 @section('title', 'Beranda')
 
 @section('content')
-<section style="padding: 80px; display: flex; justify-content: space-between;">
-    <div style="max-width: 50%;">
-        <h2 style="font-size: 42px; margin-bottom: 20px;">
-            Sistem Informasi Peminjaman Alat
-        </h2>
-        <p style="font-size: 18px; margin-bottom: 30px;">
-            Kelola peminjaman alat dengan mudah, cepat, dan terstruktur
-            untuk admin, petugas, dan peminjam.
+
+<style>
+.beranda {
+    min-height: 75vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f1f5f9;
+}
+
+.beranda-card {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+.beranda-card h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.beranda-card p {
+    color: #64748b;
+    margin: 20px 0 30px;
+}
+
+.btn-login {
+    background: #1e40af;
+    color: #fff;
+    padding: 10px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: .2s;
+}
+
+.btn-login:hover {
+    background: #1e3a8a;
+    color: #fff;
+}
+
+</style>
+
+<section class="beranda">
+    <div class="beranda-card">
+        <h2>Sistem Peminjaman Alat</h2>
+
+        <p>
+            Aplikasi pengelolaan peminjaman alat yang cepat dan terstruktur.
         </p>
 
-        <a href="{{ route('login') }}"
-           style="background:#1e40af;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;">
-            Login Sekarang
+        <a href="{{ route('login') }}" class="btn-login">
+            Login
         </a>
     </div>
-
-    <img src="https://illustrations.popsy.co/blue/web-development.svg"
-         alt="Ilustrasi"
-         width="420">
 </section>
+
 @endsection

@@ -3,40 +3,60 @@
 @section('title', 'Menyetujui Peminjaman')
 
 @section('content')
-<h3>Daftar Peminjaman Menunggu</h3>
 
-@if(session('success'))
-    <p style="color:green">{{ session('success') }}</p>
-@endif
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-@if(session('error'))
-    <p style="color:red">{{ session('error') }}</p>
-@endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
-<table border="1" cellpadding="8" width="100%">
-    <tr>
-        <th>No</th>
-        <th>Peminjam</th>
-        <th>Alat</th>
-        <th>Tgl Pinjam</th>
-        <th>Aksi</th>
-    </tr>
-
-    @foreach ($peminjamans as $p)
-    <tr>
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ $p->user->name }}</td>
-        <td>{{ $p->alat->nama_alat }}</td>
-        <td>{{ $p->tanggal_pinjam }}</td>
-        <td>
-            <form action="{{ route('petugas.setujui', $p->id) }}" method="POST">
-                @csrf
-                <button onclick="return confirm('Setujui peminjaman?')">
-                    Setujui
-                </button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>No</th>
+                    <th>Peminjam</th>
+                    <th>Alat</th>
+                    <th>Tgl Pinjam</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($peminjamans as $p)
+                    <tr class="text-center">
+                        <td>{{ $loop->iteration }}</td>
+                        <td class="text-start">{{ $p->user->name }}</td>
+                        <td class="text-start">{{ $p->alat->nama_alat }}</td>
+                        <td>{{ $p->tanggal_pinjam }}</td>
+                        <td>
+                            <span class="badge bg-secondary">
+                                {{ ucfirst($p->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            @if ($p->status === 'pending')
+                                <form action="{{ route('petugas.setujui', $p->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button class="btn btn-success btn-sm" onclick="return confirm('Setujui peminjaman?')">
+                                        Setujui
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            Tidak ada peminjaman menunggu
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 @endsection

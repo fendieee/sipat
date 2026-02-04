@@ -3,17 +3,26 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-<div class="card">
-    <h2>Selamat Datang, Admin</h2>
-    <p>
-        Anda memiliki akses penuh terhadap sistem peminjaman alat.
-    </p>
+<div class="container-fluid">
 
-    <ul style="margin-top: 15px;">
-        <li>Kelola data alat</li>
-        <li>Kelola petugas</li>
-        <li>Kelola peminjam</li>
-        <li>Lihat laporan peminjaman</li>
-    </ul>
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h2 class="mb-3">Selamat Datang, Admin</h2>
+
+            <p class="text-muted">
+                Anda memiliki akses penuh terhadap sistem peminjaman alat.
+            </p>
+
+            <ul class="list-group list-group-flush mt-3">
+                <li class="list-group-item">Kelola data alat</li>
+                <li class="list-group-item">Kelola petugas</li>
+                <li class="list-group-item">Kelola peminjam</li>
+                <li class="list-group-item">Lihat laporan peminjaman</li>
+            </ul>
+
+        </div>
+    </div>
+
 </div>
 @endsection

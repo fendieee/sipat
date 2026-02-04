@@ -3,26 +3,52 @@
 @section('title', 'Tambah Kategori')
 
 @section('content')
-<h2>Tambah Kategori</h2>
+<div class="container-fluid">
 
-@if ($errors->any())
-    <div style="color:red; margin-bottom:10px;">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST" action="{{ route('admin.kategori.store') }}">
+                @csrf
+
+                <div class="mb-3">
+                    <label class="form-label">Nama Kategori</label>
+                    <input type="text"
+                           name="nama"
+                           class="form-control"
+                           value="{{ old('nama') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Deskripsi</label>
+                    <textarea name="deskripsi"
+                              class="form-control"
+                              rows="3">{{ old('deskripsi') }}</textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Simpan
+                    </button>
+                    <a href="{{ route('admin.kategori.index') }}" class="btn btn-secondary">
+                        Kembali
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
-@endif
 
-<form method="POST" action="{{ route('admin.kategori.store') }}">
-    @csrf
-
-    <label>Nama Kategori</label><br>
-    <input type="text" name="nama" value="{{ old('nama') }}"><br><br>
-
-    <label>Deskripsi</label><br>
-    <textarea name="deskripsi">{{ old('deskripsi') }}</textarea><br><br>
-
-    <button type="submit">Simpan</button>
-    <a href="{{ route('admin.kategori.index') }}">Kembali</a>
-</form>
+</div>
 @endsection

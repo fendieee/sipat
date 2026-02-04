@@ -26,8 +26,9 @@
                 $table->date('tanggal_jatuh_tempo');
                 $table->date('tanggal_kembali')->nullable();
 
-                $table->enum('status', ['dipinjam', 'dikembalikan'])
-                    ->default('dipinjam');
+                $table->enum('status', ['pending', 'dipinjam', 'dikembalikan'])
+                    ->default('pending');
+
 
                 $table->integer('denda')->default(0);
 

@@ -3,35 +3,63 @@
 @section('title', 'Edit Peminjaman')
 
 @section('content')
-    <h2>Edit Peminjaman</h2>
+<div class="container-fluid">
 
-    <form action="{{ route('admin.peminjaman.update', $peminjaman->id) }}" method="POST">
-        @csrf
-        @method('PUT')
 
-        <p>
-            <strong>Peminjam:</strong>
-            {{ $peminjaman->user->name }}
-        </p>
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-        <p>
-            <strong>Alat:</strong>
-            {{ $peminjaman->alat->nama_alat }}
-        </p>
+            <form action="{{ route('admin.peminjaman.update', $peminjaman->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-        <p>
-            <label>Tanggal Pinjam</label><br>
-            <input type="date" name="tanggal_pinjam"
-                value="{{ old('tanggal_pinjam', $peminjaman->tanggal_pinjam) }}" required>
-        </p>
+                <div class="mb-3">
+                    <label class="form-label">Peminjam</label>
+                    <input type="text"
+                           class="form-control"
+                           value="{{ $peminjaman->user->name }}"
+                           disabled>
+                </div>
 
-        <p>
-            <label>Tanggal Jatuh Tempo</label><br>
-            <input type="date" name="tanggal_jatuh_tempo"
-                value="{{ old('tanggal_jatuh_tempo', $peminjaman->tanggal_jatuh_tempo) }}" required>
-        </p>
+                <div class="mb-3">
+                    <label class="form-label">Alat</label>
+                    <input type="text"
+                           class="form-control"
+                           value="{{ $peminjaman->alat->nama_alat }}"
+                           disabled>
+                </div>
 
-        <button type="submit">Update</button>
-        <a href="{{ route('admin.peminjaman.index') }}">Kembali</a>
-    </form>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Pinjam</label>
+                    <input type="date"
+                           name="tanggal_pinjam"
+                           class="form-control"
+                           value="{{ old('tanggal_pinjam', $peminjaman->tanggal_pinjam) }}"
+                           required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Jatuh Tempo</label>
+                    <input type="date"
+                           name="tanggal_jatuh_tempo"
+                           class="form-control"
+                           value="{{ old('tanggal_jatuh_tempo', $peminjaman->tanggal_jatuh_tempo) }}"
+                           required>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Update
+                    </button>
+                    <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-secondary">
+                        Kembali
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
 @endsection

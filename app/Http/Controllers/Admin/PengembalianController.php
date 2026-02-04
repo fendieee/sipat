@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\LogAktivitas;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class PengembalianController extends Controller
 {
+    // Tampilkan daftar alat yang sedang dipinjam
     public function index()
     {
         $peminjamans = Peminjaman::with(['user', 'alat'])
@@ -18,6 +20,7 @@ class PengembalianController extends Controller
         return view('admin.pengembalian.index', compact('peminjamans'));
     }
 
+    // Proses konfirmasi pengembalian oleh admin
     public function kembalikan($id)
     {
         $peminjaman = Peminjaman::with('alat')->findOrFail($id);
@@ -26,18 +29,18 @@ class PengembalianController extends Controller
             return back()->with('error', 'Alat sudah dikembalikan');
         }
 
-        // UPDATE STATUS
+        // Update status dan tanggal kembali
         $peminjaman->update([
             'status' => 'dikembalikan',
             'tanggal_kembali' => Carbon::now(),
         ]);
 
-        // TAMBAH STOK
+        // Kembalikan stok alat
         $peminjaman->alat->increment('stok');
 
-        // LOG AKTIVITAS
+        // Catat log aktivitas
         LogAktivitas::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'aktivitas' => 'Admin mengonfirmasi pengembalian alat',
         ]);
 

@@ -3,40 +3,70 @@
 @section('title', 'Manajemen User')
 
 @section('content')
-<h2>Manajemen User</h2>
+<div class="container-fluid">
 
-<a href="{{ route('admin.users.create') }}" class="btn">+ Tambah User</a>
 
-@if(session('success'))
-    <p style="color:green">{{ session('success') }}</p>
-@endif
+    <a href="{{ route('admin.users.create') }}" class="btn btn-primary mb-3">
+        + Tambah User
+    </a>
 
-<table border="1" cellpadding="10" cellspacing="0" width="100%">
-    <tr>
-        <th>No</th>
-        <th>Nama</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Aksi</th>
-    </tr>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    @foreach($users as $user)
-    <tr>
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ $user->name }}</td>
-        <td>{{ $user->email }}</td>
-        <td>{{ ucfirst($user->role) }}</td>
-        <td>
-            <a href="{{ route('admin.users.edit', $user->id) }}">Edit</a>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
 
-            <form action="{{ route('admin.users.destroy', $user->id) }}"
-                  method="POST" style="display:inline">
-                @csrf
-                @method('DELETE')
-                <button onclick="return confirm('Hapus user?')">Hapus</button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
+            <tbody>
+            @forelse($users as $user)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $user->email }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-info text-dark">
+                            {{ ucfirst($user->role) }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ route('admin.users.edit', $user->id) }}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <form action="{{ route('admin.users.destroy', $user->id) }}"
+                              method="POST"
+                              class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Hapus user?')">
+                                Hapus
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        Data user belum tersedia
+                    </td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
+
+</div>
 @endsection

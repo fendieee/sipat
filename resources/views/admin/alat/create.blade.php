@@ -3,39 +3,66 @@
 @section('title', 'Tambah Alat')
 
 @section('content')
-<h2>Tambah Alat</h2>
+<div class="container-fluid">
 
-@if ($errors->any())
-    <div style="color:red; margin-bottom:10px;">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form action="{{ route('admin.alat.store') }}" method="POST">
+                @csrf
+
+                <div class="mb-3">
+                    <label class="form-label">Nama Alat</label>
+                    <input type="text"
+                           name="nama_alat"
+                           class="form-control"
+                           value="{{ old('nama_alat') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Kategori</label>
+                    <select name="kategori_id" class="form-select">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach($kategoris as $kategori)
+                            <option value="{{ $kategori->id }}"
+                                {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
+                                {{ $kategori->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Stok</label>
+                    <input type="number"
+                           name="stok"
+                           class="form-control"
+                           value="{{ old('stok') }}">
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Simpan
+                    </button>
+                    <a href="{{ route('admin.alat.index') }}" class="btn btn-secondary">
+                        Kembali
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
-@endif
 
-<form action="{{ route('admin.alat.store') }}" method="POST">
-    @csrf
-
-    <label>Nama Alat</label><br>
-    <input type="text" name="nama_alat" value="{{ old('nama_alat') }}"><br><br>
-
-    <label>Kategori</label><br>
-    <select name="kategori_id">
-        <option value="">-- Pilih Kategori --</option>
-        @foreach($kategoris as $kategori)
-            <option value="{{ $kategori->id }}"
-                {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
-                {{ $kategori->nama }}
-            </option>
-        @endforeach
-    </select><br><br>
-
-    <label>Stok</label><br>
-    <input type="number" name="stok" value="{{ old('stok') }}"><br><br>
-
-    <button type="submit">Simpan</button>
-    <a href="{{ route('admin.alat.index') }}">Kembali</a>
-</form>
+</div>
 @endsection
