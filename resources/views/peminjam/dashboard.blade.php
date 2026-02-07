@@ -66,7 +66,11 @@
                                 <td>
                                     <span
                                         class="badge 
-                                    {{ $p->status === 'dipinjam' ? 'bg-warning text-dark' : 'bg-success' }}">
+                                    {{ 
+                                        $p->status === 'pending' ? 'bg-secondary' :
+                                        ($p->status === 'dipinjam' ? 'bg-warning text-dark' :
+                                        ($p->status === 'ditolak' ? 'bg-danger' : 'bg-success')) 
+                                    }}">
                                         {{ ucfirst($p->status) }}
                                     </span>
                                 </td>

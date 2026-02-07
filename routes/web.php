@@ -14,10 +14,17 @@ use App\Http\Controllers\Admin\PeminjamanController as AdminPeminjaman;
 use App\Http\Controllers\Admin\PengembalianController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 
-use App\Http\Controllers\Petugas\PetugasController;
-use App\Http\Controllers\Peminjam\PeminjamanController as PeminjamPeminjaman;
+use App\Http\Controllers\Petugas\PersetujuanController;
+use App\Http\Controllers\Petugas\PemantauanController;
+use App\Http\Controllers\Petugas\LaporanController;
+use App\Http\Controllers\Petugas\CetakLaporanController;
 
-Route::get('/', fn () => view('landing'));
+use App\Http\Controllers\Peminjam\RiwayatController;
+use App\Http\Controllers\Peminjam\PengajuanController;
+use App\Http\Controllers\Peminjam\PengembalianPeminjamController;
+
+
+Route::get('/', fn() => view('landing'));
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -37,22 +44,32 @@ Route::middleware(['auth', 'role:peminjam'])
     ->prefix('peminjam')
     ->name('peminjam.')
     ->group(function () {
-        Route::get('/peminjaman', [PeminjamPeminjaman::class, 'index'])->name('peminjaman.index');
-        Route::get('/peminjaman/create', [PeminjamPeminjaman::class, 'create'])->name('peminjaman.create');
-        Route::post('/peminjaman', [PeminjamPeminjaman::class, 'store'])->name('peminjaman.store');
-        Route::post('/peminjaman/{id}/kembalikan', [PeminjamPeminjaman::class, 'kembalikan'])->name('peminjaman.kembalikan');
+        Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
+        Route::get('/pengajuan', [PengajuanController::class, 'create'])->name('pengajuan.create');
+        Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
+        Route::post('/kembalikan/{id}', [PengembalianPeminjamController::class, 'kembalikan'])
+            ->name('kembalikan');
     });
+
 
 Route::middleware(['auth', 'role:petugas'])
     ->prefix('petugas')
     ->name('petugas.')
     ->group(function () {
-        Route::get('/menyetujui-peminjaman', [PetugasController::class, 'menyetujuiPeminjaman'])->name('menyetujui-peminjaman');
-        Route::post('/setujui/{id}', [PetugasController::class, 'setujui'])->name('setujui');
-        Route::get('/memantau-pengembalian', [PetugasController::class, 'memantauPengembalian'])->name('memantau-pengembalian');
-        Route::get('/laporan-peminjaman', [PetugasController::class, 'laporanPeminjaman'])->name('laporan-peminjaman');
-        Route::get('/laporan-peminjaman/cetak', [PetugasController::class, 'cetakLaporan'])->name('laporan-peminjaman.cetak');
+        Route::get('/persetujuan', [PersetujuanController::class, 'index'])
+            ->name('persetujuan');
+        Route::post('/setujui/{id}', [PersetujuanController::class, 'setujui'])
+            ->name('setujui');
+        Route::post('/tolak/{id}', [PersetujuanController::class, 'tolak'])
+            ->name('tolak');
+        Route::get('/pemantauan', [PemantauanController::class, 'index'])
+            ->name('pemantauan');
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('laporan');
+        Route::get('/laporan/cetak', CetakLaporanController::class)
+            ->name('laporan.cetak');
     });
+
 
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')

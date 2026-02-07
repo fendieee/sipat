@@ -97,15 +97,16 @@
         @endif
 
         @if (auth()->user()->role === 'petugas')
-            <a href="/petugas/menyetujui-peminjaman">Persetujuan Peminjaman</a>
-            <a href="/petugas/memantau-pengembalian">Monitoring Pengembalian</a>
-            <a href="/petugas/laporan-peminjaman">Laporan Peminjaman</a>
+            <a href="{{ route('petugas.persetujuan') }}">Persetujuan Peminjaman</a>
+            <a href="{{ route('petugas.pemantauan') }}">Monitoring Pengembalian</a>
+            <a href="{{ route('petugas.laporan') }}">Laporan Peminjaman</a>
         @endif
 
         @if (auth()->user()->role === 'peminjam')
-            <a href="{{ route('peminjam.peminjaman.create') }}">Ajukan Peminjaman</a>
-            <a href="{{ route('peminjam.peminjaman.index') }}">Riwayat Peminjaman</a>
+            <a href="{{ route('peminjam.pengajuan.create') }}">Ajukan Peminjaman</a>
+            <a href="{{ route('peminjam.riwayat') }}">Riwayat Peminjaman</a>
         @endif
+
     </div>
 
     {{-- CONTENT --}}
