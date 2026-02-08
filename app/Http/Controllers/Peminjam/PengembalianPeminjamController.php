@@ -4,55 +4,49 @@ namespace App\Http\Controllers\Peminjam;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class PengembalianPeminjamController extends Controller
 {
-    public function kembalikan($id)
+    public function kembalikan(Request $request, $id)
     {
-        $peminjaman = Peminjaman::with('alat')
-            ->where('id', $id)
+        $request->validate([
+            'foto_kondisi' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $peminjaman = Peminjaman::where('id', $id)
             ->where('user_id', Auth::id())
             ->where('status', 'dipinjam')
             ->firstOrFail();
 
-        $dendaPerHari = 5000;
+        // ✅ Simpan foto ke public (BENAR)
+        $path = $request->file('foto_kondisi')
+            ->store('foto_kondisi', 'public');
 
-        // 🔹 PAKAI FORMAT TANGGAL SAJA (HILANGKAN JAM)
-        $jatuhTempo = Carbon::parse($peminjaman->tanggal_jatuh_tempo)->toDateString();
-        $tanggalKembali = Carbon::now()->toDateString();
+        // Hitung keterlambatan
+        $jatuhTempo = Carbon::parse($peminjaman->tanggal_jatuh_tempo);
+        $tanggalKembali = Carbon::now();
 
         $hariTelat = 0;
-        $totalDenda = 0;
 
-        if ($tanggalKembali > $jatuhTempo) {
-            // ✅ HITUNG SELISIH HARI (PASTI ANGKA BULAT)
-            $hariTelat = Carbon::parse($jatuhTempo)
-                ->diffInDays(Carbon::parse($tanggalKembali));
-
+        if ($tanggalKembali->greaterThan($jatuhTempo)) {
+            $hariTelat = $jatuhTempo->diffInDays($tanggalKembali);
             if ($hariTelat < 1) {
                 $hariTelat = 1;
             }
-
-            $totalDenda = $hariTelat * $dendaPerHari;
         }
 
         $peminjaman->update([
-            'status' => 'dikembalikan',
+            'foto_kondisi' => $path,
             'tanggal_kembali' => Carbon::now(),
             'hari_telat' => $hariTelat,
-            'denda' => $totalDenda,
+            'status' => 'menunggu_pemeriksaan',
         ]);
 
-        $peminjaman->alat->increment('stok');
-
-        return back()->with(
-            'success',
-            $hariTelat > 0
-                ? "Alat dikembalikan. Telat {$hariTelat} hari. Denda: Rp "
-                . number_format($totalDenda, 0, ',', '.')
-                : "Alat berhasil dikembalikan."
+        return back()->with('success', 
+            'Pengembalian diajukan. Menunggu pemeriksaan petugas.'
         );
     }
 }

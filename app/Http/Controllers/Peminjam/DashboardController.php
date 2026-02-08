@@ -22,13 +22,17 @@ class DashboardController extends Controller
                 ->where('status', 'dipinjam')
                 ->count(),
 
-            // 5 riwayat peminjaman terakhir user ini
-            'riwayat' => Peminjaman::where('user_id', $userId)
+            // 5 riwayat peminjaman terakhir (LOAD alat + kategori)
+            'riwayat' => Peminjaman::with('alat.kategori')
+                ->where('user_id', $userId)
                 ->latest()
                 ->take(5)
                 ->get(),
-            // list alat
-            'daftarAlat' => Alat::select('id', 'nama_alat')->get(),
+
+            // list alat (LOAD kategori juga!)
+            'daftarAlat' => Alat::with('kategori')
+                ->select('id', 'nama_alat', 'kategori_id')
+                ->get(),
         ]);
     }
 }

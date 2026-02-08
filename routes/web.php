@@ -13,11 +13,13 @@ use App\Http\Controllers\Admin\AlatController;
 use App\Http\Controllers\Admin\PeminjamanController as AdminPeminjaman;
 use App\Http\Controllers\Admin\PengembalianController;
 use App\Http\Controllers\Admin\LogAktivitasController;
+use App\Http\Controllers\Admin\RekapPengembalianController;
 
 use App\Http\Controllers\Petugas\PersetujuanController;
 use App\Http\Controllers\Petugas\PemantauanController;
 use App\Http\Controllers\Petugas\LaporanController;
 use App\Http\Controllers\Petugas\CetakLaporanController;
+use App\Http\Controllers\Petugas\PemeriksaanPengembalianController;
 
 use App\Http\Controllers\Peminjam\RiwayatController;
 use App\Http\Controllers\Peminjam\PengajuanController;
@@ -63,13 +65,15 @@ Route::middleware(['auth', 'role:peminjam'])
     ->prefix('peminjam')
     ->name('peminjam.')
     ->group(function () {
-
         Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
 
         Route::get('/pengajuan', [PengajuanController::class, 'create'])->name('pengajuan.create');
         Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
 
-        Route::post('/kembalikan/{id}', [PengembalianPeminjamController::class, 'kembalikan'])
+        Route::post(
+            '/kembalikan/{id}',
+            [PengembalianPeminjamController::class, 'kembalikan']
+        )
             ->name('kembalikan');
     });
 
@@ -92,9 +96,6 @@ Route::middleware(['auth', 'role:petugas'])
         // Pemantauan
         Route::get('/pemantauan', [PemantauanController::class, 'index'])->name('pemantauan');
 
-        // =========================
-        // LAPORAN (FINAL FIX)
-        // =========================
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
 
         Route::get('/laporan/user', [LaporanController::class, 'perUser'])
@@ -107,7 +108,16 @@ Route::middleware(['auth', 'role:petugas'])
             ->name('laporan.user.cetak');
 
         Route::get('/laporan/cetak', [CetakLaporanController::class, 'cetak'])
-            ->name('laporan.cetak');
+            ->name('laporan.bulan.cetak');
+
+        Route::get('/pemeriksaan', [PemeriksaanPengembalianController::class, 'index'])
+            ->name('pemeriksaan');
+
+        Route::post(
+            '/pemeriksaan/selesai/{id}',
+            [PemeriksaanPengembalianController::class, 'selesaikan']
+        )
+            ->name('pemeriksaan.selesai');
     });
 
 // ==========================
@@ -133,4 +143,10 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])
             ->name('log-aktivitas.index');
+
+        Route::get(
+            '/pengembalian/rekap',
+            [RekapPengembalianController::class, 'index']
+        )
+            ->name('pengembalian.rekap');
     });

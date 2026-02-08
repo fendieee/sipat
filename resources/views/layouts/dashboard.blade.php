@@ -121,12 +121,14 @@
             <a href="/admin/alat">Data Alat</a>
             <a href="/admin/peminjaman">Peminjaman</a>
             <a href="/admin/pengembalian">Pengembalian</a>
+            <a href="{{ route('admin.pengembalian.rekap') }}">Rekap Pengembalian</a>
             <a href="/admin/log-aktivitas">Log Aktivitas</a>
         @endif
 
         @if (auth()->user()->role === 'petugas')
             <a href="{{ route('petugas.persetujuan') }}">Persetujuan Peminjaman</a>
             <a href="{{ route('petugas.pemantauan') }}">Monitoring Pengembalian</a>
+            <a href="{{ route('petugas.pemeriksaan') }}">Pemeriksaan Pengembalian</a>
 
             {{-- DROPDOWN LAPORAN --}}
             <div class="dropdown">
@@ -135,8 +137,8 @@
                     Laporan Peminjaman
                 </button>
                 <ul class="dropdown-menu w-100">
-                    <li><a class="dropdown-item" href="{{ route('petugas.laporan') }}">Semua Laporan</a></li>
-                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.cetak') }}">Cetak Laporan</a></li>
+                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.user') }}"> Per User</a></li>
+                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.bulan') }}"> Per Bulan</a></li>
                 </ul>
             </div>
         @endif

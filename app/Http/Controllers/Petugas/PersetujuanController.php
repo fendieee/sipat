@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use App\Models\LogAktivitas;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PersetujuanController extends Controller
@@ -28,6 +29,7 @@ class PersetujuanController extends Controller
 
         $peminjaman->update([
             'status' => 'dipinjam',
+            'alasan_tolak' => null,
         ]);
 
         $peminjaman->alat->decrement('stok');
@@ -39,20 +41,28 @@ class PersetujuanController extends Controller
 
         return back()->with('success', 'Peminjaman disetujui');
     }
-    
-    public function tolak($id)
+
+    public function tolak(Request $request, $id)
     {
+        // VALIDASI (biar tidak gagal diam-diam)
+        $request->validate([
+            'alasan_tolak' => 'required|string|min:5',
+        ]);
+
         $peminjaman = Peminjaman::with('alat')->findOrFail($id);
 
         $peminjaman->update([
             'status' => 'ditolak',
+            'alasan_tolak' => $request->alasan_tolak,
         ]);
 
         LogAktivitas::create([
             'user_id' => Auth::id(),
-            'aktivitas' => 'Petugas menolak peminjaman alat: ' . $peminjaman->alat->nama_alat,
+            'aktivitas' => 'Petugas menolak peminjaman alat: '
+                . $peminjaman->alat->nama_alat
+                . ' | Alasan: ' . $request->alasan_tolak,
         ]);
 
-        return back()->with('success', 'Peminjaman ditolak');
+        return back()->with('success', 'Peminjaman berhasil ditolak');
     }
 }

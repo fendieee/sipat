@@ -12,12 +12,15 @@ class Peminjaman extends Model
     protected $fillable = [
         'user_id',
         'foto_peminjam',
+        'foto_kondisi',
         'alat_id',
         'tanggal_pinjam',
         'tanggal_jatuh_tempo',
         'tanggal_kembali',
+        'hari_telat',
         'status',
         'denda',
+        'catatan_petugas',
     ];
 
     // =====================
