@@ -31,11 +31,10 @@
                     @forelse($peminjamans as $p)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
-
                             <td>{{ $p->alat->kategori->nama ?? '-' }}</td>
                             <td>{{ $p->alat->nama_alat }}</td>
 
-                            {{-- DESKRIPSI DENGAN SEE MORE --}}
+                            {{-- DESKRIPSI (SEE MORE) --}}
                             <td>
                                 @php
                                     $full = $p->alat->deskripsi;
@@ -63,39 +62,49 @@
                                 @endif
                             </td>
 
-                            {{-- FOTO --}}
+                            {{-- FOTO PEMINJAM --}}
                             <td class="text-center">
                                 @if ($p->foto_peminjam)
-                                    <div class="d-flex justify-content-center">
-                                        <img src="{{ asset('storage/' . $p->foto_peminjam) }}" width="100"
-                                            height="100" style="object-fit: cover;" class="img-thumbnail">
-                                    </div>
+                                    <img src="{{ asset('storage/' . $p->foto_peminjam) }}" width="100" height="100"
+                                        style="object-fit: cover;" class="img-thumbnail">
                                 @else
                                     <span class="text-muted">Belum ada foto</span>
                                 @endif
                             </td>
 
-                            <td class="text-center">{{ $p->tanggal_pinjam }}</td>
-                            <td class="text-center">{{ $p->tanggal_jatuh_tempo }}</td>
-
-                            {{-- STATUS --}}
                             <td class="text-center">
-                                @php
-                                    $badge = match ($p->status) {
-                                        'pending' => 'bg-secondary',
-                                        'dipinjam' => 'bg-warning text-dark',
-                                        'dikembalikan' => 'bg-success',
-                                        'ditolak' => 'bg-danger',
-                                        default => 'bg-light text-dark',
-                                    };
-                                @endphp
-
-                                <span class="badge {{ $badge }}">
-                                    {{ ucfirst($p->status) }}
-                                </span>
+                                {{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d M Y') }}
+                            </td>
+                            <td class="text-center">
+                                {{ \Carbon\Carbon::parse($p->tanggal_jatuh_tempo)->format('d M Y') }}
                             </td>
 
-                            {{-- ✅ DENDA (SUDAH BENAR, AMBIL DARI DB) --}}
+                            {{-- STATUS --}}
+                            @php
+                                $badge = match ($p->status) {
+                                    'pending' => 'bg-secondary',
+                                    'dipinjam' => 'bg-warning text-dark',
+                                    'dikembalikan' => 'bg-success',
+                                    'ditolak' => 'bg-danger',
+                                    default => 'bg-light text-dark',
+                                };
+
+                                $terlambat =
+                                    $p->status === 'dipinjam' &&
+                                    \Carbon\Carbon::now()->greaterThan($p->tanggal_jatuh_tempo);
+                            @endphp
+
+                            <td class="text-center">
+                                @if ($terlambat)
+                                    <span class="badge bg-danger">Terlambat</span>
+                                @else
+                                    <span class="badge {{ $badge }}">
+                                        {{ ucfirst($p->status) }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            {{-- DENDA --}}
                             <td class="text-center">
                                 @if ($p->denda > 0)
                                     <span class="badge bg-danger">
@@ -109,7 +118,8 @@
                             {{-- AKSI --}}
                             <td class="text-center">
                                 @if ($p->status === 'dipinjam')
-                                    <form method="POST" action="{{ route('peminjam.kembalikan', $p->id) }}">
+                                    <form method="POST" action="{{ route('peminjam.kembalikan', $p->id) }}"
+                                        class="d-inline">
                                         @csrf
                                         <button class="btn btn-sm btn-success" onclick="return confirm('Kembalikan alat?')">
                                             Kembalikan
@@ -133,15 +143,10 @@
         </div>
     </div>
 
-    {{-- SCRIPT SEE MORE --}}
     <script>
         function toggleDesc(id) {
-            const shortText = document.getElementById('short-' + id);
-            const fullText = document.getElementById('full-' + id);
-
-            shortText.classList.toggle('d-none');
-            fullText.classList.toggle('d-none');
+            document.getElementById('short-' + id).classList.toggle('d-none');
+            document.getElementById('full-' + id).classList.toggle('d-none');
         }
     </script>
-
 @endsection

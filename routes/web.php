@@ -23,7 +23,6 @@ use App\Http\Controllers\Peminjam\RiwayatController;
 use App\Http\Controllers\Peminjam\PengajuanController;
 use App\Http\Controllers\Peminjam\PengembalianPeminjamController;
 
-
 Route::get('/', fn() => view('landing'));
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -40,48 +39,34 @@ Route::middleware(['auth', 'role:admin'])->get('/admin/dashboard', [AdminDashboa
 Route::middleware(['auth', 'role:petugas'])->get('/petugas/dashboard', [PetugasDashboard::class, 'index'])->name('petugas.dashboard');
 Route::middleware(['auth', 'role:peminjam'])->get('/peminjam/dashboard', [PeminjamDashboard::class, 'index'])->name('peminjam.dashboard');
 
-Route::middleware(['auth', 'role:peminjam'])
-    ->prefix('peminjam')
-    ->name('peminjam.')
-    ->group(function () {
-        Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
-        Route::get('/pengajuan', [PengajuanController::class, 'create'])->name('pengajuan.create');
-        Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
-        Route::post('/kembalikan/{id}', [PengembalianPeminjamController::class, 'kembalikan'])
-            ->name('kembalikan');
-    });
+Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
+    Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
+    Route::get('/pengajuan', [PengajuanController::class, 'create'])->name('pengajuan.create');
+    Route::post('/pengajuan', [PengajuanController::class, 'store'])->name('pengajuan.store');
+    Route::post('/kembalikan/{id}', [PengembalianPeminjamController::class, 'kembalikan'])->name('kembalikan');
+});
 
+Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+    Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan');
+    Route::post('/setujui/{id}', [PersetujuanController::class, 'setujui'])->name('setujui');
+    Route::post('/tolak/{id}', [PersetujuanController::class, 'tolak'])->name('tolak');
+    Route::get('/pemantauan', [PemantauanController::class, 'index'])->name('pemantauan');
 
-Route::middleware(['auth', 'role:petugas'])
-    ->prefix('petugas')
-    ->name('petugas.')
-    ->group(function () {
-        Route::get('/persetujuan', [PersetujuanController::class, 'index'])
-            ->name('persetujuan');
-        Route::post('/setujui/{id}', [PersetujuanController::class, 'setujui'])
-            ->name('setujui');
-        Route::post('/tolak/{id}', [PersetujuanController::class, 'tolak'])
-            ->name('tolak');
-        Route::get('/pemantauan', [PemantauanController::class, 'index'])
-            ->name('pemantauan');
-        Route::get('/laporan', [LaporanController::class, 'index'])
-            ->name('laporan');
-        Route::get('/laporan/cetak', CetakLaporanController::class)
-            ->name('laporan.cetak');
-    });
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+    Route::get('/laporan/user', [LaporanController::class, 'perUser'])->name('laporan.user');
+    Route::get('/laporan/bulan', [LaporanController::class, 'perBulan'])->name('laporan.bulan');
+    Route::get('/laporan/user/cetak/{userId}', [CetakLaporanController::class, 'perUser'])->name('laporan.user.cetak');
+    Route::get('/laporan/bulan/cetak/{bulan}/{tahun}', [CetakLaporanController::class, 'perBulan'])->name('laporan.bulan.cetak');
+});
 
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class);
+    Route::resource('kategori', KategoriController::class);
+    Route::resource('alat', AlatController::class);
+    Route::resource('peminjaman', AdminPeminjaman::class);
 
-Route::middleware(['auth', 'role:admin'])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        Route::resource('users', UserController::class);
-        Route::resource('kategori', KategoriController::class);
-        Route::resource('alat', AlatController::class);
-        Route::resource('peminjaman', AdminPeminjaman::class);
+    Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
+    Route::post('/pengembalian/{id}', [PengembalianController::class, 'kembalikan'])->name('pengembalian.kembalikan');
 
-        Route::get('/pengembalian', [PengembalianController::class, 'index'])->name('pengembalian.index');
-        Route::post('/pengembalian/{id}', [PengembalianController::class, 'kembalikan'])->name('pengembalian.kembalikan');
-
-        Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log-aktivitas.index');
-    });
+    Route::get('/log-aktivitas', [LogAktivitasController::class, 'index'])->name('log-aktivitas.index');
+});
