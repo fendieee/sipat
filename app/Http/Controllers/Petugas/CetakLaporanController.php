@@ -4,11 +4,28 @@ namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
+use Illuminate\Http\Request;
 
 class CetakLaporanController extends Controller
 {
-    // Cetak per User
-    public function perUser($userId)
+    // =========================
+    // CETAK SEMUA LAPORAN
+    // route: petugas.laporan.cetak
+    // =========================
+    public function cetak()
+    {
+        $peminjamans = Peminjaman::with(['user', 'alat', 'alat.kategori'])
+            ->latest()
+            ->get();
+
+        return view('petugas.laporan.cetak', compact('peminjamans'));
+    }
+
+    // =========================
+    // CETAK PER USER
+    // route: petugas.laporan.user.cetak
+    // =========================
+    public function cetakPerUser($userId)
     {
         $peminjamans = Peminjaman::with(['user', 'alat', 'alat.kategori'])
             ->where('user_id', $userId)
@@ -18,8 +35,11 @@ class CetakLaporanController extends Controller
         return view('petugas.laporan.cetak_per_user', compact('peminjamans'));
     }
 
-    // Cetak per Bulan
-    public function perBulan($bulan, $tahun)
+    // =========================
+    // CETAK PER BULAN
+    // (opsional kalau mau dipakai)
+    // =========================
+    public function cetakPerBulan($bulan, $tahun)
     {
         $peminjamans = Peminjaman::with(['user', 'alat', 'alat.kategori'])
             ->whereYear('tanggal_pinjam', $tahun)

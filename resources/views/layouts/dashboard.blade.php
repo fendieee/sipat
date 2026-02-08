@@ -135,8 +135,8 @@
                     Laporan Peminjaman
                 </button>
                 <ul class="dropdown-menu w-100">
-                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.user') }}">Per User</a></li>
-                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.bulan') }}">Per Bulan</a></li>
+                    <li><a class="dropdown-item" href="{{ route('petugas.laporan') }}">Semua Laporan</a></li>
+                    <li><a class="dropdown-item" href="{{ route('petugas.laporan.cetak') }}">Cetak Laporan</a></li>
                 </ul>
             </div>
         @endif
