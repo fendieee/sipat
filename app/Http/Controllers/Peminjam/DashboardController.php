@@ -29,10 +29,10 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get(),
 
-            // list alat (LOAD kategori juga!)
+            // ✅ PAGINATION 8 PER HALAMAN
             'daftarAlat' => Alat::with('kategori')
-                ->select('id', 'nama_alat', 'kategori_id')
-                ->get(),
+                ->orderBy('id', 'desc')
+                ->paginate(8),
         ]);
     }
 }

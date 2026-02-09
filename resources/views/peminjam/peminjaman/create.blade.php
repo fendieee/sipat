@@ -27,7 +27,9 @@
                         <select id="kategoriSelect" class="form-select" required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($kategoris as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                                <option value="{{ $k->id }}" {{ request('kategori') == $k->id ? 'selected' : '' }}>
+                                    {{ $k->nama }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -35,12 +37,13 @@
                     {{-- Pilih Alat --}}
                     <div class="mb-3">
                         <label class="form-label">Pilih Alat</label>
-                        <select name="alat_id" id="alatSelect" class="form-select" required disabled>
+                        <select name="alat_id" id="alatSelect" class="form-select" required>
                             <option value="">-- Pilih Alat --</option>
                             @foreach ($alats as $alat)
                                 <option value="{{ $alat->id }}" data-kategori="{{ $alat->kategori_id }}"
                                     data-gambar="{{ $alat->gambar_alat ? asset('storage/' . $alat->gambar_alat) : '' }}"
-                                    data-deskripsi="{{ $alat->deskripsi }}" data-harga="{{ $alat->harga }}">
+                                    data-deskripsi="{{ $alat->deskripsi }}" data-harga="{{ $alat->harga }}"
+                                    {{ request('alat') == $alat->id ? 'selected' : '' }}>
                                     {{ $alat->nama_alat }}
                                 </option>
                             @endforeach
@@ -122,27 +125,34 @@
         document.getElementById('tanggalPinjam').min = today;
         document.getElementById('tanggalJatuhTempo').min = today;
 
+        // Saat halaman dimuat, jika ada alat dari dashboard -> langsung tampilkan preview
+        window.addEventListener('load', function() {
+            const alatSelect = document.getElementById('alatSelect');
+            if (alatSelect.value) {
+                triggerPreview();
+            }
+        });
+
         // Filter kategori -> alat
         document.getElementById('kategoriSelect').addEventListener('change', function() {
             const kategoriId = this.value;
             const alatSelect = document.getElementById('alatSelect');
 
-            alatSelect.value = "";
-            alatSelect.disabled = kategoriId === "";
-
             Array.from(alatSelect.options).forEach(opt => {
                 if (opt.value === "") return;
                 opt.style.display =
-                    opt.getAttribute('data-kategori') === kategoriId ?
-                    "block" : "none";
+                    opt.getAttribute('data-kategori') === kategoriId ? "block" : "none";
             });
 
             hitungTotal();
         });
 
-        // Preview gambar, deskripsi, dan harga alat
-        document.getElementById('alatSelect').addEventListener('change', function() {
-            const selected = this.options[this.selectedIndex];
+        // Saat alat dipilih
+        document.getElementById('alatSelect').addEventListener('change', triggerPreview);
+
+        function triggerPreview() {
+            const alatSelect = document.getElementById('alatSelect');
+            const selected = alatSelect.options[alatSelect.selectedIndex];
 
             const gambar = selected.getAttribute('data-gambar');
             const deskripsi = selected.getAttribute('data-deskripsi');
@@ -166,9 +176,9 @@
             }
 
             hitungTotal();
-        });
+        }
 
-        // Update total saat tanggal berubah
+        // Validasi tanggal
         document.getElementById('tanggalJatuhTempo').addEventListener('change', function() {
             const pinjam = document.getElementById('tanggalPinjam').value;
 
@@ -191,7 +201,6 @@
             hitungTotal();
         });
 
-        // Update total saat jumlah berubah
         document.getElementById('jumlahPinjam').addEventListener('input', hitungTotal);
 
         // Preview foto peminjam
