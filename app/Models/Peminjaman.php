@@ -22,6 +22,7 @@ class Peminjaman extends Model
     'alasan_denda',
     'foto_peminjam',
     'foto_kondisi',
+    'kondisi',
 ];
 
 

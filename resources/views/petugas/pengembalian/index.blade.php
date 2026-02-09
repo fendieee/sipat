@@ -17,10 +17,20 @@
                         <th>Gambar Alat</th>
                         <th>Tanggal Pinjam</th>
                         <th>Jatuh Tempo</th>
+                        <th>Kondisi</th> {{-- ✅ KOLUM BARU --}}
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($peminjamans as $p)
+                        @php
+                            $kondisiBadge = match ($p->kondisi ?? '') {
+                                'baik' => 'success',
+                                'rusak' => 'warning',
+                                'hilang' => 'danger',
+                                default => 'secondary',
+                            };
+                        @endphp
+
                         <tr class="text-center">
                             <td>{{ $loop->iteration }}</td>
                             <td class="text-start">{{ $p->user->name }}</td>
@@ -38,10 +48,22 @@
 
                             <td>{{ \Carbon\Carbon::parse($p->tanggal_pinjam)->format('d M Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($p->tanggal_jatuh_tempo)->format('d M Y') }}</td>
+
+                            {{-- ✅ KONDISI (BARU) --}}
+                            <td>
+                                @if ($p->kondisi)
+                                    <span class="badge bg-{{ $kondisiBadge }}">
+                                        {{ ucfirst($p->kondisi) }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">Belum dikembalikan</span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
     @endif
+
 @endsection

@@ -27,6 +27,7 @@ class PengajuanController extends Controller
     {
         $request->validate([
             'alat_id' => 'required|exists:alats,id',
+            'jumlah' => 'required|integer|min:1', // ✅ TAMBAH VALIDASI JUMLAH
             'tanggal_pinjam' => 'required|date',
             'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
             'foto_peminjam' => 'required|image|mimes:jpg,jpeg,png|max:2048',
@@ -34,8 +35,9 @@ class PengajuanController extends Controller
 
         $alat = Alat::findOrFail($request->alat_id);
 
-        if ($alat->stok < 1) {
-            return back()->withErrors('Stok alat habis');
+        // Cek stok cukup atau tidak
+        if ($alat->stok < $request->jumlah) {
+            return back()->withErrors('Stok alat tidak mencukupi');
         }
 
         $sudahPinjam = Peminjaman::where('user_id', Auth::id())
@@ -47,23 +49,27 @@ class PengajuanController extends Controller
             return back()->withErrors('Anda sudah mengajukan / masih meminjam alat ini');
         }
 
-        // 👉 PROSES UPLOAD FOTO PEMINJAM (INI YANG BARU)
+        // Upload foto peminjam
         $pathFoto = $request->file('foto_peminjam')
             ->store('foto_peminjam', 'public');
 
-        // Buat peminjaman
+        // Buat peminjaman (✅ SUDAH ADA JUMLAH)
         Peminjaman::create([
             'user_id' => Auth::id(),
             'alat_id' => $alat->id,
+            'jumlah' => $request->jumlah, // ✅ PENTING — FIX ERROR
             'tanggal_pinjam' => $request->tanggal_pinjam,
             'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
             'foto_peminjam' => $pathFoto,
             'status' => 'pending',
         ]);
 
+        // Kurangi stok alat (opsional tapi biasanya perlu)
+        $alat->decrement('stok', $request->jumlah);
+
         LogAktivitas::create([
             'user_id' => Auth::id(),
-            'aktivitas' => 'Mengajukan peminjaman alat',
+            'aktivitas' => "Mengajukan peminjaman alat ({$alat->nama}) sebanyak {$request->jumlah}",
         ]);
 
         return redirect()

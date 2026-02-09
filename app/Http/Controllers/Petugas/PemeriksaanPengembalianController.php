@@ -12,8 +12,9 @@ class PemeriksaanPengembalianController extends Controller
 {
     public function index()
     {
-        $peminjamans = Peminjaman::with(['user', 'alat'])
+        $peminjamans = Peminjaman::with(['user', 'alat.kategori'])
             ->where('status', 'menunggu_pemeriksaan')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('petugas.pemeriksaan.index', compact('peminjamans'));
@@ -28,38 +29,42 @@ class PemeriksaanPengembalianController extends Controller
 
         $peminjaman = Peminjaman::with('alat')->findOrFail($id);
 
-        $kondisi = $peminjaman->alasan_denda; // kondisi dari peminjam
+        // Ambil kondisi yang diisi peminjam
+        $kondisi = $peminjaman->kondisi;
+        $jumlahPinjam = (int) $peminjaman->jumlah;
+
+        // Default status
         $status = 'dikembalikan';
 
-        // ==============================
-        // LOGIKA KONDISI
-        // ==============================
-
+        // Logika kondisi
         if ($kondisi === 'hilang') {
-
-            // ❌ stok tidak kembali
+            // Jika hilang → stok TIDAK kembali
             $status = 'hilang';
-
         } else {
-
-            // ✅ stok kembali
-            $peminjaman->alat->increment('stok', $peminjaman->jumlah);
+            // Jika baik / rusak → stok kembali
+            if ($peminjaman->alat && $jumlahPinjam > 0) {
+                $peminjaman->alat->increment('stok', $jumlahPinjam);
+            }
         }
 
+        // Update peminjaman
         $peminjaman->update([
             'status' => $status,
             'denda' => $request->denda,
+            'catatan_petugas' => $request->catatan_petugas,
+            'tanggal_kembali' => now(), // Tambahkan tanggal kembali
         ]);
 
+        // Simpan log aktivitas petugas
         LogAktivitas::create([
             'user_id' => Auth::id(),
-            'aktivitas' =>
-                "Petugas menyelesaikan pengembalian alat: "
-                . $peminjaman->alat->nama_alat
-                . " | Kondisi: " . $kondisi
-                . " | Denda: Rp " . number_format($request->denda, 0, ',', '.'),
+            'aktivitas' => "Petugas menyelesaikan pengembalian alat: " .
+                $peminjaman->alat->nama_alat .
+                " | Kondisi: " . ($kondisi ?? 'belum ada') .
+                " | Jumlah: " . $jumlahPinjam .
+                " | Denda: Rp " . number_format($request->denda, 0, ',', '.'),
         ]);
 
-        return back()->with('success', 'Pengembalian selesai.');
+        return back()->with('success', 'Pengembalian berhasil diselesaikan.');
     }
 }
