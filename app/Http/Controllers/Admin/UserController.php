@@ -55,7 +55,7 @@ class UserController extends Controller
 
         $data = $request->only('name', 'email', 'role');
 
-        if ($request->password) {
+        if   ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
 

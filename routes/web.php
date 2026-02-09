@@ -107,8 +107,7 @@ Route::middleware(['auth', 'role:petugas'])
         Route::get('/laporan/user/cetak/{id}', [CetakLaporanController::class, 'cetakPerUser'])
             ->name('laporan.user.cetak');
 
-        Route::get('/laporan/cetak', [CetakLaporanController::class, 'cetak'])
-            ->name('laporan.bulan.cetak');
+        Route::get('/laporan/bulan/cetak/{bulan}/{tahun}',[CetakLaporanController::class, 'cetakPerBulan'])->name('laporan.bulan.cetak');
 
         Route::get('/pemeriksaan', [PemeriksaanPengembalianController::class, 'index'])
             ->name('pemeriksaan');

@@ -3,139 +3,187 @@
 @section('title', 'Tambah Peminjaman')
 
 @section('content')
-<div class="container-fluid">
+    <div class="container-fluid">
 
-    {{-- ALERT --}}
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+        {{-- ALERT --}}
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+        <div class="card shadow-sm">
+            <div class="card-body">
 
-            <form action="{{ route('admin.peminjaman.store') }}" method="POST">
-                @csrf
+                <form action="{{ route('admin.peminjaman.store') }}" method="POST">
+                    @csrf
 
-                {{-- PEMINJAM --}}
-                <div class="mb-3">
-                    <label class="form-label">Peminjam</label>
-                    <select name="user_id" class="form-select" required>
-                        <option value="">-- Pilih Peminjam --</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}">
-                                {{ $user->name }} ({{ $user->email }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    {{-- PEMINJAM --}}
+                    <div class="mb-3">
+                        <label class="form-label">Peminjam</label>
+                        <select name="user_id" class="form-select" required>
+                            <option value="">-- Pilih Peminjam --</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}">
+                                    {{ $user->name }} ({{ $user->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                {{-- KATEGORI --}}
-                <div class="mb-3">
-                    <label class="form-label">Kategori Alat</label>
-                    <select id="kategori" class="form-select" required>
-                        <option value="">-- Pilih Kategori --</option>
-                        @foreach ($kategoris as $kategori)
-                            <option value="{{ $kategori->id }}">
-                                {{ $kategori->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    {{-- KATEGORI --}}
+                    <div class="mb-3">
+                        <label class="form-label">Kategori Alat</label>
+                        <select id="kategori" class="form-select" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach ($kategoris as $kategori)
+                                <option value="{{ $kategori->id }}">{{ $kategori->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                {{-- ALAT --}}
-                <div class="mb-3">
-                    <label class="form-label">Alat</label>
-                    <select name="alat_id" id="alat" class="form-select" disabled required>
-                        <option value="">-- Pilih Alat --</option>
-                    </select>
-                    <small id="infoAlat" class="text-muted">
-                        Pilih kategori terlebih dahulu
-                    </small>
-                </div>
+                    {{-- ALAT --}}
+                    <div class="mb-3">
+                        <label class="form-label">Alat</label>
+                        <select name="alat_id" id="alat" class="form-select" required disabled>
+                            <option value="">-- Pilih Alat --</option>
+                        </select>
+                        <small id="infoAlat" class="text-muted">Pilih kategori terlebih dahulu</small>
+                    </div>
 
-                {{-- TANGGAL --}}
-                <div class="mb-3">
-                    <label class="form-label">Tanggal Pinjam</label>
-                    <input type="date" name="tanggal_pinjam" class="form-control" required>
-                </div>
+                    {{-- JUMLAH --}}
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" name="jumlah" id="jumlah" class="form-control" value="1"
+                            min="1" required>
+                    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Tanggal Jatuh Tempo</label>
-                    <input type="date" name="tanggal_jatuh_tempo" class="form-control" required>
-                </div>
+                    {{-- TANGGAL --}}
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Pinjam</label>
+                        <input type="date" name="tanggal_pinjam" id="tanggalPinjam" class="form-control" required>
+                    </div>
 
-                {{-- BUTTON --}}
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                    <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-secondary">Batal</a>
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal Jatuh Tempo</label>
+                        <input type="date" name="tanggal_jatuh_tempo" id="tanggalJatuhTempo" class="form-control"
+                            required>
+                    </div>
 
-            </form>
+                    {{-- TOTAL HARGA --}}
+                    <div class="mb-3">
+                        <label class="form-label">Total Harga</label>
+                        <input type="text" id="totalHarga" class="form-control" readonly>
+                    </div>
 
+                    {{-- BUTTON --}}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-secondary">Batal</a>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 
-</div>
+    {{-- SCRIPT --}}
+    <script>
+        const kategoriSelect = document.getElementById('kategori');
+        const alatSelect = document.getElementById('alat');
+        const infoAlat = document.getElementById('infoAlat');
+        const jumlahInput = document.getElementById('jumlah');
+        const tanggalPinjam = document.getElementById('tanggalPinjam');
+        const tanggalJatuhTempo = document.getElementById('tanggalJatuhTempo');
+        const totalHargaBox = document.getElementById('totalHarga');
 
-{{-- SCRIPT --}}
-<script>
-    const kategoriSelect = document.getElementById('kategori');
-    const alatSelect = document.getElementById('alat');
-    const infoAlat = document.getElementById('infoAlat');
+        // Set min date hari ini
+        const today = new Date().toISOString().split('T')[0];
+        tanggalPinjam.min = today;
+        tanggalJatuhTempo.min = today;
 
-    // Alert kalau klik alat sebelum pilih kategori
-    alatSelect.addEventListener('click', function(){
-        if(kategoriSelect.value === ""){
-            alert("⚠️ Pilih kategori alat terlebih dahulu!");
-        }
-    });
-
-    // Load alat berdasarkan kategori
-    kategoriSelect.addEventListener('change', function(){
-        let kategoriId = this.value;
-
-        alatSelect.innerHTML = '<option value="">Loading...</option>';
-        alatSelect.disabled = true;
-
-        if(kategoriId){
-            fetch(`/admin/get-alat/${kategoriId}`)
-                .then(res => res.json())
-                .then(data => {
-                    alatSelect.innerHTML = '<option value="">-- Pilih Alat --</option>';
-
-                    if(data.length === 0){
-                        alatSelect.innerHTML += '<option value="">Tidak ada alat</option>';
-                    }
-
-                    data.forEach(alat => {
-                        alatSelect.innerHTML += 
-                            `<option value="${alat.id}">
-                                ${alat.nama_alat} (Stok: ${alat.stok})
-                            </option>`;
-                    });
-
-                    alatSelect.disabled = false;
-                    infoAlat.innerText = "";
-                });
-        }else{
-            alatSelect.innerHTML = '<option value="">-- Pilih Alat --</option>';
+        // Load alat berdasarkan kategori
+        kategoriSelect.addEventListener('change', function() {
+            let kategoriId = this.value;
+            alatSelect.innerHTML = '<option value="">Loading...</option>';
             alatSelect.disabled = true;
-            infoAlat.innerText = "Pilih kategori terlebih dahulu";
+
+            if (kategoriId) {
+                fetch(`/admin/get-alat/${kategoriId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        alatSelect.innerHTML = '<option value="">-- Pilih Alat --</option>';
+                        if (data.length === 0) {
+                            alatSelect.innerHTML += '<option value="">Tidak ada alat</option>';
+                        }
+                        data.forEach(alat => {
+                            alatSelect.innerHTML +=
+                                `<option value="${alat.id}" data-harga="${alat.harga}">
+                            ${alat.nama_alat} (Stok: ${alat.stok})
+                        </option>`;
+                        });
+                        alatSelect.disabled = false;
+                        infoAlat.innerText = "";
+                        hitungTotal();
+                    });
+            } else {
+                alatSelect.innerHTML = '<option value="">-- Pilih Alat --</option>';
+                alatSelect.disabled = true;
+                infoAlat.innerText = "Pilih kategori terlebih dahulu";
+                hitungTotal();
+            }
+        });
+
+        // Alert kalau klik alat sebelum pilih kategori
+        alatSelect.addEventListener('click', function() {
+            if (kategoriSelect.value === "") {
+                alert("⚠️ Pilih kategori alat terlebih dahulu!");
+            }
+        });
+
+        // Hitung total otomatis
+        function hitungTotal() {
+            const selectedAlat = alatSelect.options[alatSelect.selectedIndex];
+            const harga = selectedAlat ? parseInt(selectedAlat.getAttribute('data-harga') || 0) : 0;
+            const jumlah = parseInt(jumlahInput.value || 1);
+            const t1 = tanggalPinjam.value ? new Date(tanggalPinjam.value) : null;
+            const t2 = tanggalJatuhTempo.value ? new Date(tanggalJatuhTempo.value) : null;
+
+            if (!t1 || !t2 || harga === 0) {
+                totalHargaBox.value = "";
+                return;
+            }
+
+            const diffDays = Math.max(1, Math.ceil((t2 - t1) / (1000 * 60 * 60 * 24)));
+            const total = diffDays * harga * jumlah;
+            totalHargaBox.value =
+                `${jumlah} × ${diffDays} hari × Rp ${harga.toLocaleString('id-ID')} = Rp ${total.toLocaleString('id-ID')}`;
         }
-    });
-</script>
+
+        alatSelect.addEventListener('change', hitungTotal);
+        jumlahInput.addEventListener('input', hitungTotal);
+        tanggalPinjam.addEventListener('change', function() {
+            tanggalJatuhTempo.value = "";
+            hitungTotal();
+        });
+        tanggalJatuhTempo.addEventListener('change', function() {
+            if (tanggalJatuhTempo.value <= tanggalPinjam.value) {
+                alert('Tanggal jatuh tempo harus lebih besar dari tanggal pinjam!');
+                tanggalJatuhTempo.value = "";
+            }
+            hitungTotal();
+        });
+    </script>
 @endsection

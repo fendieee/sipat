@@ -18,7 +18,7 @@ class CetakLaporanController extends Controller
             ->latest()
             ->get();
 
-        return view('petugas.laporan.cetak', compact('peminjamans'));
+        return view('petugas.laporan.cetak_per_bulan', compact('peminjamans'));
     }
 
     // =========================
