@@ -28,23 +28,38 @@ class PemeriksaanPengembalianController extends Controller
 
         $peminjaman = Peminjaman::with('alat')->findOrFail($id);
 
-        $peminjaman->update([
-            'status' => 'dikembalikan',
-            'denda' => $request->denda,
-            'catatan_petugas' => $request->catatan_petugas,
-        ]);
+        $kondisi = $peminjaman->alasan_denda; // kondisi dari peminjam
+        $status = 'dikembalikan';
 
-        // Kembalikan stok alat
-        $peminjaman->alat->increment('stok');
+        // ==============================
+        // LOGIKA KONDISI
+        // ==============================
+
+        if ($kondisi === 'hilang') {
+
+            // ❌ stok tidak kembali
+            $status = 'hilang';
+
+        } else {
+
+            // ✅ stok kembali
+            $peminjaman->alat->increment('stok', $peminjaman->jumlah);
+        }
+
+        $peminjaman->update([
+            'status' => $status,
+            'denda' => $request->denda,
+        ]);
 
         LogAktivitas::create([
             'user_id' => Auth::id(),
             'aktivitas' =>
-            "Petugas menyelesaikan pengembalian alat: "
+                "Petugas menyelesaikan pengembalian alat: "
                 . $peminjaman->alat->nama_alat
+                . " | Kondisi: " . $kondisi
                 . " | Denda: Rp " . number_format($request->denda, 0, ',', '.'),
         ]);
 
-        return back()->with('success', 'Pengembalian selesai dan stok telah dikembalikan.');
+        return back()->with('success', 'Pengembalian selesai.');
     }
 }

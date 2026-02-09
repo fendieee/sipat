@@ -20,6 +20,10 @@ class Alat extends Model
         'kategori_id',
     ];
 
+    protected $casts = [
+        'stok' => 'integer',
+    ];
+
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);

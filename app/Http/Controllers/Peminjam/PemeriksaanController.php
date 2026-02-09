@@ -23,25 +23,34 @@ class PemeriksaanController extends Controller
     {
         $request->validate([
             'denda' => 'required|integer|min:0',
-            'alasan_denda' => 'nullable|string',
+            'catatan_petugas' => 'nullable|string',
         ]);
 
         $peminjaman = Peminjaman::with('alat')->findOrFail($id);
 
-        $peminjaman->update([
-            'denda' => $request->denda,
-            'alasan_denda' => $request->alasan_denda,
-            'status' => 'dikembalikan',
-        ]);
+        // Jika sebelumnya dilaporkan hilang
+        if ($peminjaman->alasan_denda === 'Dilaporkan hilang oleh peminjam') {
 
-        // KEMBALIKAN STOK ALAT
-        $peminjaman->alat->increment('stok');
+            $peminjaman->update([
+                'status' => 'hilang',
+                'denda' => $peminjaman->alat->harga * $peminjaman->jumlah,
+                'alasan_denda' => 'Barang hilang',
+            ]);
 
-        LogAktivitas::create([
-            'user_id' => Auth::id(),
-            'aktivitas' => "Pemeriksaan selesai untuk alat: {$peminjaman->alat->nama_alat}. Denda: Rp {$request->denda}",
-        ]);
+            // ❌ STOK TIDAK DIKEMBALIKAN
 
-        return back()->with('success', 'Pengembalian selesai diproses.');
+        } else {
+
+            $peminjaman->update([
+                'status' => 'dikembalikan',
+                'denda' => $request->denda,
+                'catatan_petugas' => $request->catatan_petugas,
+            ]);
+
+            // ✅ STOK KEMBALI SESUAI JUMLAH
+            $peminjaman->alat->increment('stok', $peminjaman->jumlah);
+        }
+
+        return back()->with('success', 'Pemeriksaan selesai.');
     }
 }

@@ -3,186 +3,204 @@
 @section('title', 'Riwayat Peminjaman')
 
 @section('content')
-    <div class="container-fluid">
+<div class="container-fluid">
 
-        {{-- Header --}}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Riwayat Peminjaman</h5>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold">Riwayat Peminjaman</h5>
         </div>
 
-        {{-- Alert --}}
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+        <div class="card-body">
 
-        {{-- Tabel --}}
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th width="5%">No</th>
-                        <th width="10%">Kategori</th>
-                        <th width="12%">Alat</th>
-                        <th width="25%">Deskripsi</th>
-                        <th width="10%">Foto</th>
-                        <th width="5%">Jumlah</th>
-                        <th width="7%">Tgl Pinjam</th>
-                        <th width="7%">Jatuh Tempo</th>
-                        <th width="10%">Harga Total</th>
-                        <th width="7%">Status</th>
-                        <th width="7%">Denda</th>
-                        <th width="7%">Aksi</th>
-                    </tr>
-                </thead>
+            {{-- Alert --}}
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-                <tbody>
-                    @forelse($peminjamans as $p)
-                        @php
-                            $tglPinjam = \Carbon\Carbon::parse($p->tanggal_pinjam);
-                            $tglJatuhTempo = \Carbon\Carbon::parse($p->tanggal_jatuh_tempo);
-
-                            $jumlahHari = $tglPinjam->diffInDays($tglJatuhTempo);
-                            $jumlahHari = $jumlahHari < 1 ? 1 : $jumlahHari;
-
-                            $hargaPerHari = $p->alat->harga ?? 0;
-                            $jumlahPinjam = $p->jumlah ?? 1; // jumlah pinjam
-                            $totalHarga = $jumlahHari * $hargaPerHari * $jumlahPinjam;
-
-                            $fullDesc = $p->alat->deskripsi ?? '-';
-                            $shortDesc = \Illuminate\Support\Str::limit($fullDesc, 80);
-
-                            $statusBadge = match ($p->status) {
-                                'pending' => 'bg-secondary',
-                                'dipinjam' => 'bg-warning text-dark',
-                                'menunggu_pemeriksaan' => 'bg-info text-dark',
-                                'dikembalikan' => 'bg-success',
-                                'ditolak' => 'bg-danger',
-                                default => 'bg-light text-dark',
-                            };
-                        @endphp
-
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light text-center">
                         <tr>
-                            {{-- No --}}
-                            <td class="text-center">{{ $loop->iteration }}</td>
+                            <th>No</th>
+                            <th>Kategori</th>
+                            <th>Alat</th>
+                            <th>Jumlah</th>
+                            <th>Tgl Pinjam</th>
+                            <th>Jatuh Tempo</th>
+                            <th>Total Harga</th>
+                            <th>Status</th>
+                            <th>Kondisi</th>
+                            <th>Denda</th>
+                            <th>Foto Kondisi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
 
-                            {{-- Kategori --}}
-                            <td>{{ $p->alat->kategori->nama ?? '-' }}</td>
+                    <tbody>
+                        @forelse($peminjamans as $p)
 
-                            {{-- Alat --}}
-                            <td>{{ $p->alat->nama_alat ?? '-' }}</td>
+                            @php
+                                $tglPinjam = \Carbon\Carbon::parse($p->tanggal_pinjam);
+                                $tglJatuhTempo = \Carbon\Carbon::parse($p->tanggal_jatuh_tempo);
+                                $jumlahHari = max($tglPinjam->diffInDays($tglJatuhTempo), 1);
+                                $hargaPerHari = $p->alat->harga ?? 0;
+                                $jumlahPinjam = $p->jumlah ?? 1;
+                                $totalHarga = $jumlahHari * $hargaPerHari * $jumlahPinjam;
 
-                            {{-- Deskripsi --}}
-                            <td>
-                                <p class="mb-1" id="short-{{ $p->id }}">
-                                    {{ $shortDesc }}
-                                    @if (strlen($fullDesc) > 80)
-                                        <a href="javascript:void(0)" class="text-primary ms-1"
-                                            onclick="toggleDesc({{ $p->id }})">
-                                            See more
-                                        </a>
+                                $statusBadge = match ($p->status) {
+                                    'pending' => 'secondary',
+                                    'dipinjam' => 'warning',
+                                    'menunggu_pemeriksaan' => 'info',
+                                    'dikembalikan' => 'success',
+                                    'ditolak' => 'danger',
+                                    'hilang' => 'danger',
+                                    default => 'light',
+                                };
+
+                                $kondisiBadge = match ($p->kondisi ?? '') {
+                                    'baik' => 'success',
+                                    'rusak' => 'warning',
+                                    'hilang' => 'danger',
+                                    default => 'secondary',
+                                };
+                            @endphp
+
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td>{{ $p->alat->kategori->nama ?? '-' }}</td>
+                                <td class="fw-semibold">{{ $p->alat->nama_alat ?? '-' }}</td>
+                                <td class="text-center">{{ $jumlahPinjam }}</td>
+                                <td class="text-center">{{ $tglPinjam->format('d M Y') }}</td>
+                                <td class="text-center">{{ $tglJatuhTempo->format('d M Y') }}</td>
+                                <td class="text-center">
+                                    <div class="fw-bold text-dark">
+                                        Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ $jumlahPinjam }} × {{ $jumlahHari }} hari ×
+                                        Rp {{ number_format($hargaPerHari, 0, ',', '.') }}
+                                    </small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-{{ $statusBadge }}">
+                                        {{ ucfirst(str_replace('_', ' ', $p->status)) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if($p->kondisi)
+                                        <span class="badge bg-{{ $kondisiBadge }}">
+                                            {{ ucfirst($p->kondisi) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
-                                </p>
-                                @if (strlen($fullDesc) > 80)
-                                    <p class="mb-0 d-none" id="full-{{ $p->id }}">
-                                        {{ $fullDesc }}
-                                        <a href="javascript:void(0)" class="text-danger ms-1"
-                                            onclick="toggleDesc({{ $p->id }})">
-                                            See less
-                                        </a>
-                                    </p>
-                                @endif
-                            </td>
-
-                            {{-- Foto --}}
-                            <td class="text-center">
-                                @if ($p->foto_peminjam)
-                                    <img src="{{ asset('storage/' . $p->foto_peminjam) }}" class="img-thumbnail"
-                                        style="width:80px; height:80px; object-fit:cover;">
-                                @else
-                                    <span class="text-muted">Belum ada</span>
-                                @endif
-                            </td>
-
-                            {{-- Jumlah Pinjam --}}
-                            <td class="text-center">{{ $jumlahPinjam }}</td>
-
-                            {{-- Tanggal Pinjam --}}
-                            <td class="text-center">{{ $tglPinjam->format('d M Y') }}</td>
-
-                            {{-- Tanggal Jatuh Tempo --}}
-                            <td class="text-center">{{ $tglJatuhTempo->format('d M Y') }}</td>
-
-                            {{-- Harga Total --}}
-                            <td class="text-center">
-                                <span class="fw-bold">Rp {{ number_format($totalHarga, 0, ',', '.') }}</span>
-                                <br>
-                                <small class="text-muted">({{ $jumlahPinjam }} × {{ $jumlahHari }} hari × Rp
-                                    {{ number_format($hargaPerHari, 0, ',', '.') }})</small>
-                            </td>
-
-                            {{-- Status --}}
-                            <td class="text-center">
-                                <span class="badge {{ $statusBadge }}">
-                                    {{ ucfirst(str_replace('_', ' ', $p->status)) }}
-                                </span>
-                            </td>
-
-                            {{-- Denda --}}
-                            <td class="text-center">
-                                @if ($p->denda > 0)
-                                    <span class="badge bg-danger">Rp {{ number_format($p->denda, 0, ',', '.') }}</span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-
-                            {{-- Aksi --}}
-                            <td class="text-center">
-                                @if ($p->status === 'dipinjam')
-                                    <button class="btn btn-success btn-sm w-100 mb-1"
-                                        onclick="showForm({{ $p->id }})">
-                                        Kembalikan
-                                    </button>
-
-                                    <form id="form-{{ $p->id }}" method="POST"
-                                        action="{{ route('peminjam.kembalikan', $p->id) }}" enctype="multipart/form-data"
-                                        class="d-none">
-                                        @csrf
-                                        <input type="file" name="foto_kondisi" accept="image/*"
-                                            class="form-control form-control-sm mb-2" required>
-                                        <button class="btn btn-primary btn-sm w-100"
-                                            onclick="return confirm('Ajukan pengembalian?')">
-                                            Kirim Foto
+                                </td>
+                                <td class="text-center">
+                                    @if ($p->denda > 0)
+                                        <span class="badge bg-danger">
+                                            Rp {{ number_format($p->denda, 0, ',', '.') }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if (!empty($p->foto_kondisi))
+                                        <img src="{{ asset('storage/' . $p->foto_kondisi) }}"
+                                             class="rounded shadow-sm"
+                                             style="width:70px;height:70px;object-fit:cover;">
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
+                                </td>
+                                <td class="text-center" style="min-width:150px">
+                                    @if ($p->status === 'dipinjam')
+                                        <button class="btn btn-success btn-sm w-100 mb-1"
+                                                onclick="showForm({{ $p->id }})">
+                                            Kembalikan
                                         </button>
-                                    </form>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="12" class="text-center text-muted">Belum ada riwayat peminjaman</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+                                        <form id="form-{{ $p->id }}"
+                                              method="POST"
+                                              action="{{ route('peminjam.kembalikan', $p->id) }}"
+                                              enctype="multipart/form-data"
+                                              class="d-none">
+                                            @csrf
+                                            <select name="kondisi"
+                                                    class="form-select form-select-sm mb-2"
+                                                    required>
+                                                <option value="">-- Pilih Kondisi --</option>
+                                                <option value="baik">Baik</option>
+                                                <option value="rusak">Rusak</option>
+                                                <option value="hilang">Hilang</option>
+                                            </select>
+
+                                            <input type="file"
+                                                   name="foto_kondisi"
+                                                   accept="image/*"
+                                                   class="form-control form-control-sm mb-2">
+
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm w-100"
+                                                    onclick="validateForm({{ $p->id }})">
+                                                Kirim
+                                            </button>
+
+                                        </form>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center text-muted py-4">
+                                    Belum ada riwayat peminjaman
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
+</div>
 
-    {{-- Script --}}
-    @push('scripts')
-        <script>
-            function toggleDesc(id) {
-                document.getElementById('short-' + id).classList.toggle('d-none');
-                document.getElementById('full-' + id).classList.toggle('d-none');
-            }
+@push('scripts')
+<script>
+function showForm(id) {
+    let form = document.getElementById('form-' + id);
+    if (form) {
+        form.classList.remove('d-none');
+    }
+}
 
-            function showForm(id) {
-                document.getElementById('form-' + id).classList.remove('d-none');
-            }
-        </script>
-    @endpush
+function validateForm(id) {
+    let form = document.getElementById('form-' + id);
+    let kondisi = form.querySelector('select[name="kondisi"]').value;
+    let foto = form.querySelector('input[name="foto_kondisi"]').value;
+
+    if (!kondisi) {
+        alert('Silakan pilih kondisi barang!');
+        return;
+    }
+
+    // LOGIKA: baik atau rusak wajib foto
+    if ((kondisi === 'baik' || kondisi === 'rusak') && !foto) {
+        alert('Foto kondisi wajib diupload untuk barang Baik atau Rusak!');
+        return;
+    }
+
+    if (confirm('Ajukan pengembalian?')) {
+        form.submit();
+    }
+}
+</script>
+@endpush
+
 @endsection

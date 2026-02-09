@@ -59,15 +59,8 @@ class PeminjamanController extends Controller
             'jumlah' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date',
             'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
-        ], [
-            'user_id.required' => 'Peminjam wajib dipilih.',
-            'alat_id.required' => 'Alat wajib dipilih.',
-            'jumlah.required' => 'Jumlah wajib diisi.',
-            'tanggal_pinjam.required' => 'Tanggal pinjam wajib diisi.',
-            'tanggal_jatuh_tempo.after_or_equal' => 'Tanggal jatuh tempo harus sama atau setelah tanggal pinjam.',
         ]);
 
-        // cek duplikat
         $exists = Peminjaman::where('user_id', $validated['user_id'])
             ->where('alat_id', $validated['alat_id'])
             ->whereIn('status', ['pending', 'dipinjam'])
@@ -79,24 +72,23 @@ class PeminjamanController extends Controller
 
         $alat = Alat::findOrFail($validated['alat_id']);
 
-        if ($alat->stok < $validated['jumlah']) {
+        if ($alat->stok < (int) $validated['jumlah']) {
             return back()->with('error', 'Stok alat tidak cukup.');
         }
 
-        // kurangi stok sesuai jumlah
-        $alat->decrement('stok', $validated['jumlah']);
+        // Kurangi stok
+        $alat->decrement('stok', (int) $validated['jumlah']);
 
-        // simpan peminjaman
+        // Simpan peminjaman
         Peminjaman::create([
             'user_id' => $validated['user_id'],
             'alat_id' => $validated['alat_id'],
-            'jumlah' => $validated['jumlah'],
+            'jumlah' => (int) $validated['jumlah'],
             'tanggal_pinjam' => $validated['tanggal_pinjam'],
             'tanggal_jatuh_tempo' => $validated['tanggal_jatuh_tempo'],
             'status' => 'dipinjam',
         ]);
 
-        // log aktivitas
         LogAktivitas::create([
             'user_id' => Auth::id(),
             'aktivitas' => 'Menambahkan data peminjaman alat',
@@ -130,41 +122,39 @@ class PeminjamanController extends Controller
             'jumlah' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date',
             'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
-        ], [
-            'user_id.required' => 'Peminjam wajib dipilih.',
-            'alat_id.required' => 'Alat wajib dipilih.',
-            'jumlah.required' => 'Jumlah wajib diisi.',
-            'tanggal_pinjam.required' => 'Tanggal pinjam wajib diisi.',
-            'tanggal_jatuh_tempo.after_or_equal' => 'Tanggal jatuh tempo harus sama atau setelah tanggal pinjam.',
         ]);
 
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // jika ganti alat atau jumlah → kembalikan stok lama
-        if ($peminjaman->alat_id != $validated['alat_id'] || $peminjaman->jumlah != $validated['jumlah']) {
+        if (
+            $peminjaman->alat_id != $validated['alat_id'] ||
+            (int) $peminjaman->jumlah !== (int) $validated['jumlah']
+        ) {
+            // Kembalikan stok lama
             $alatLama = Alat::find($peminjaman->alat_id);
             if ($alatLama) {
-                $alatLama->increment('stok', $peminjaman->jumlah);
+                $alatLama->increment('stok', (int) $peminjaman->jumlah);
             }
 
+            // Cek stok baru
             $alatBaru = Alat::findOrFail($validated['alat_id']);
-            if ($alatBaru->stok < $validated['jumlah']) {
+
+            if ($alatBaru->stok < (int) $validated['jumlah']) {
                 return back()->with('error', 'Stok alat tidak cukup.');
             }
 
-            $alatBaru->decrement('stok', $validated['jumlah']);
+            // Kurangi stok baru
+            $alatBaru->decrement('stok', (int) $validated['jumlah']);
         }
 
-        // update data
         $peminjaman->update([
             'user_id' => $validated['user_id'],
             'alat_id' => $validated['alat_id'],
-            'jumlah' => $validated['jumlah'],
+            'jumlah' => (int) $validated['jumlah'],
             'tanggal_pinjam' => $validated['tanggal_pinjam'],
             'tanggal_jatuh_tempo' => $validated['tanggal_jatuh_tempo'],
         ]);
 
-        // log aktivitas
         LogAktivitas::create([
             'user_id' => Auth::id(),
             'aktivitas' => 'Mengubah data peminjaman alat',
@@ -182,16 +172,13 @@ class PeminjamanController extends Controller
     {
         $peminjaman = Peminjaman::findOrFail($id);
 
-        // balikin stok sesuai jumlah
         $alat = Alat::find($peminjaman->alat_id);
         if ($alat) {
-            $alat->increment('stok', $peminjaman->jumlah);
+            $alat->increment('stok', (int) $peminjaman->jumlah);
         }
 
-        // hapus peminjaman
         $peminjaman->delete();
 
-        // log aktivitas
         LogAktivitas::create([
             'user_id' => Auth::id(),
             'aktivitas' => 'Menghapus data peminjaman alat',
