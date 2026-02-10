@@ -12,7 +12,7 @@ class AlatController extends Controller
 {
     public function index()
     {
-        $alats = Alat::with('kategori')->orderBy('id', 'desc')->get();
+        $alats = Alat::with('kategoris')->orderBy('id', 'desc')->get();
         return view('admin.alat.index', compact('alats'));
     }
 
@@ -28,8 +28,9 @@ class AlatController extends Controller
             'nama_alat'   => 'required|unique:alats,nama_alat',
             'deskripsi'   => 'nullable|string',
             'stok'        => 'required|integer|min:0',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'harga'       => 'required|integer|min:0', // 🔥 VALIDASI HARGA
+            'kategori_id' => 'required|array',
+            'kategori_id.*' => 'exists:kategoris,id',
+            'harga'       => 'required|integer|min:0',
             'gambar_alat' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -39,14 +40,16 @@ class AlatController extends Controller
                 ->store('gambar_alat', 'public');
         }
 
-        Alat::create([
+        $alat = Alat::create([
             'nama_alat'   => $request->nama_alat,
             'deskripsi'   => $request->deskripsi,
             'stok'        => $request->stok,
-            'kategori_id' => $request->kategori_id,
-            'harga'       => $request->harga, // 🔥 SIMPAN HARGA
+            'harga'       => $request->harga,
             'gambar_alat' => $gambarPath,
         ]);
+
+
+        $alat->kategoris()->attach($request->kategori_id);
 
         return redirect()
             ->route('admin.alat.index')
@@ -67,11 +70,11 @@ class AlatController extends Controller
             'nama_alat'   => 'required|unique:alats,nama_alat,' . $id,
             'deskripsi'   => 'nullable|string',
             'stok'        => 'required|integer|min:0',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'harga'       => 'required|integer|min:0', // 🔥 VALIDASI HARGA
+            'kategori_id' => 'required|array',
+            'kategori_id.*' => 'exists:kategoris,id',
+            'harga'       => 'required|integer|min:0',
             'gambar_alat' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-
         $alat = Alat::findOrFail($id);
 
         // Data utama
@@ -91,6 +94,7 @@ class AlatController extends Controller
         }
 
         $alat->save();
+        $alat->kategoris()->sync($request->kategori_id);
 
         return redirect()
             ->route('admin.alat.index')

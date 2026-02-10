@@ -37,14 +37,26 @@ class LaporanController extends Controller
     // Laporan Per Bulan
     public function perBulan(Request $request)
     {
-        $bulan = $request->query('bulan') ?? date('m');
-        $tahun = $request->query('tahun') ?? date('Y');
+        if ($request->filled('bulan')) {
+            [$tahun, $bulan] = explode('-', $request->bulan);
+        } else {
+            $bulan = date('m');
+            $tahun = date('Y');
+        }
 
-        $peminjamans = Peminjaman::with(['user', 'alat', 'alat.kategori'])
+        $query = Peminjaman::with(['user', 'alat', 'alat.kategori'])
             ->whereYear('tanggal_pinjam', $tahun)
-            ->whereMonth('tanggal_pinjam', $bulan)
-            ->latest()
-            ->get();
+            ->whereMonth('tanggal_pinjam', $bulan);
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_pinjam', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_pinjam', '<=', $request->end_date);
+        }
+
+        $peminjamans = $query->latest()->get();
 
         return view('petugas.laporan.per_bulan', compact('peminjamans', 'bulan', 'tahun'));
     }

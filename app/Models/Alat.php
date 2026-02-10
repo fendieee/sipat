@@ -29,6 +29,11 @@ class Alat extends Model
         return $this->belongsTo(Kategori::class);
     }
 
+        public function kategoris()
+    {
+        return $this->belongsToMany(Kategori::class, 'alat_kategori');
+    }
+
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class);

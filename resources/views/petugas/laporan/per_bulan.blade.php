@@ -3,12 +3,37 @@
 @section('title', 'Laporan Peminjaman Per Bulan')
 
 @section('content')
-    <form action="{{ route('petugas.laporan.bulan') }}" method="GET" class="mb-3 d-flex gap-2 flex-wrap">
-        <input type="month" name="bulan" value="{{ $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) }}" class="form-control">
+    <form action="{{ route('petugas.laporan.bulan') }}" method="GET" class="mb-3 d-flex gap-2 flex-wrap align-items-end">
+
+        <div>
+            <label class="form-label">Bulan</label>
+            <input type="month" name="bulan" value="{{ $tahun . '-' . str_pad($bulan, 2, '0', STR_PAD_LEFT) }}"
+                class="form-control">
+        </div>
+
+        <div>
+            <label class="form-label">Dari Tanggal</label>
+            <input type="date" name="start_date" value="{{ request('start_date') }}" class="form-control">
+        </div>
+
+        <div>
+            <label class="form-label">Sampai Tanggal</label>
+            <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control">
+        </div>
+
         <button class="btn btn-primary">Tampilkan</button>
-        <a href="{{ route('petugas.laporan.bulan.cetak', [$bulan, $tahun]) }}" target="_blank"
-            class="btn btn-success">Cetak</a>
+
+        <a href="{{ route('petugas.laporan.bulan.cetak', [
+            $bulan,
+            $tahun,
+            'start_date' => request('start_date'),
+            'end_date' => request('end_date'),
+        ]) }}"
+            target="_blank" class="btn btn-success">
+            Cetak
+        </a>
     </form>
+
 
     @if ($peminjamans->isEmpty())
         <div class="alert alert-warning">Data peminjaman tidak tersedia untuk bulan ini.</div>

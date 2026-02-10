@@ -22,6 +22,7 @@
                         <thead class="table-light text-center">
                             <tr>
                                 <th>No</th>
+                                <th>Foto Peminjam</th>
                                 <th>Kategori</th>
                                 <th>Alat</th>
                                 <th>Jumlah</th>
@@ -67,6 +68,14 @@
 
                                 <tr>
                                     <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td class="text-center">
+                                        @if (!empty($p->foto_peminjam))
+                                            <img src="{{ asset('storage/' . $p->foto_peminjam) }}" class="rounded shadow-sm"
+                                                style="width:70px;height:70px;object-fit:cover;">
+                                        @else
+                                            <span class="text-muted small">-</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $p->alat->kategori->nama ?? '-' }}</td>
                                     <td class="fw-semibold">{{ $p->alat->nama_alat ?? '-' }}</td>
                                     <td class="text-center">{{ $jumlahPinjam }}</td>
@@ -108,14 +117,6 @@
                                         @if (!empty($p->foto_kondisi))
                                             <img src="{{ asset('storage/' . $p->foto_kondisi) }}" class="rounded shadow-sm"
                                                 style="width:70px;height:70px;object-fit:cover;">
-                                        @else
-                                            <span class="text-muted small">-</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if (!empty($p->foto_peminjam))
-                                            <img src="{{ asset('storage/' . $p->foto_peminjam) }}"
-                                                class="rounded shadow-sm" style="width:70px;height:70px;object-fit:cover;">
                                         @else
                                             <span class="text-muted small">-</span>
                                         @endif

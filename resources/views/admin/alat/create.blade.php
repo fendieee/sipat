@@ -47,7 +47,7 @@
                 <!-- Kategori -->
                 <div class="mb-3">
                     <label class="form-label">Kategori</label>
-                    <select name="kategori_id" class="form-select" required>
+                    <select name="kategori_id[]" class="form-select" multiple required>
                         <option value="">-- Pilih Kategori --</option>
                         @foreach ($kategoris as $kategori)
                             <option value="{{ $kategori->id }}"
@@ -72,8 +72,7 @@
                     <label class="form-label">Harga per Item (Rp)</label>
                     <input type="number" name="harga" class="form-control"
                         value="{{ old('harga') }}"
-                        min="0"
-                        required>
+                        >
                 </div>
 
                 <!-- Gambar -->

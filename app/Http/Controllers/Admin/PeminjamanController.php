@@ -10,6 +10,7 @@ use App\Models\Kategori;
 use App\Models\LogAktivitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\peminjamanRequest;
 
 class PeminjamanController extends Controller
 {
@@ -51,15 +52,9 @@ class PeminjamanController extends Controller
     // ==============================
     // STORE
     // ==============================
-    public function store(Request $request)
+    public function PeminjamanRequest(peminjamanRequest $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'alat_id' => 'required|exists:alats,id',
-            'jumlah' => 'required|integer|min:1',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_jatuh_tempo' => 'required|date|after_or_equal:tanggal_pinjam',
-        ]);
+        $validated = $request->validated();
 
         $exists = Peminjaman::where('user_id', $validated['user_id'])
             ->where('alat_id', $validated['alat_id'])
